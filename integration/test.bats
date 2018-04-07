@@ -30,11 +30,6 @@ function run_cronic() {
   run_cronic "${BATS_TEST_DIRNAME}/timeout.crontab" 1s | grep -iE "job took too long to run"
 }
 
-@test "it runs overlapped jobs" {
-  n="$(CRONIC_ARGS="-overlapping" run_cronic "${BATS_TEST_DIRNAME}/timeout.crontab" 5s | grep -iE "starting" | wc -l)"
-  [[ "$n" -eq 5 ]]
-}
-
 @test "it warns repeatedly when a job is still running" {
   n="$(run_cronic "${BATS_TEST_DIRNAME}/timeout.crontab" 1s | grep -iE "job is still running" | wc -l)"
   [[ "$n" -eq 2 ]]

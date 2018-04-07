@@ -10,7 +10,7 @@ import (
 
 	"github.com/samgaw/cronic/cron"
 	"github.com/samgaw/cronic/crontab"
-
+	
 	"github.com/sirupsen/logrus"
 )
 
@@ -23,7 +23,6 @@ var Usage = func() {
 func main() {
 	debug := flag.Bool("debug", false, "enable debug logging")
 	json := flag.Bool("json", false, "enable JSON logging")
-	overlapping := flag.Bool("overlapping", false, "enable tasks overlapping")
 	flag.Parse()
 
 	if *debug {
@@ -43,7 +42,7 @@ func main() {
 	}
 
 	crontabFileName := flag.Args()[0]
-	logrus.Infof("read crontab: %s", crontabFileName)
+	logrus.Infof("CRONIC: Read crontab %s", crontabFileName)
 
 	tab, err := readCrontabAtPath(crontabFileName)
 
@@ -67,7 +66,7 @@ func main() {
 			"job.position": job.Position,
 		})
 
-		cron.StartJob(&wg, tab.Context, job, exitChan, cronLogger, *overlapping)
+		cron.StartJob(&wg, tab.Context, job, exitChan, cronLogger)
 	}
 
 	termChan := make(chan os.Signal, 1)
@@ -75,15 +74,15 @@ func main() {
 
 	termSig := <-termChan
 
-	logrus.Infof("received %s, shutting down", termSig)
+	logrus.Infof("CRONIC: Received %s, shutting down", termSig)
 	for _, c := range exitChans {
 		c <- true
 	}
 
-	logrus.Info("waiting for jobs to finish")
+	logrus.Info("CRONIC: Waiting for jobs to finish")
 	wg.Wait()
 
-	logrus.Info("exiting")
+	logrus.Info("CRONIC: Exiting")
 }
 
 func readCrontabAtPath(path string) (*crontab.Crontab, error) {

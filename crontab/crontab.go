@@ -36,7 +36,7 @@ func parseJobLine(line string) (*CrontabLine, error) {
 		commandStarts := indices[count][0]
 
 		// TODO: Should receive a logger?
-		logrus.Debugf("try parse(%d): %s[0:%d] = %s", count, line, scheduleEnds, line[0:scheduleEnds])
+		logrus.Debugf("CRONIC: Try parse(%d): %s[0:%d] = %s", count, line, scheduleEnds, line[0:scheduleEnds])
 
 		expr, err := cronexpr.Parse(line[:scheduleEnds])
 
@@ -50,7 +50,7 @@ func parseJobLine(line string) (*CrontabLine, error) {
 			Command:    line[commandStarts:],
 		}, nil
 	}
-	return nil, fmt.Errorf("bad crontab line: %s", line)
+	return nil, fmt.Errorf("CRONIC: Bad crontab line: %s", line)
 }
 
 func ParseCrontab(reader io.Reader) (*Crontab, error) {
@@ -88,12 +88,12 @@ func ParseCrontab(reader io.Reader) (*Crontab, error) {
 			}
 
 			if envKey == "SHELL" {
-				logrus.Infof("processes will be spawned using shell: %s", envVal)
+				logrus.Infof("CRONIC: Processes will be spawned using shell %s", envVal)
 				shell = envVal
 			}
 
 			if envKey == "USER" {
-				logrus.Warnf("processes will NOT be spawned as USER=%s", envVal)
+				logrus.Warnf("CRONIC: Processes will NOT be spawned as USER=%s", envVal)
 			}
 
 			environ[envKey] = envVal

@@ -3,9 +3,8 @@ package crontab
 import (
 	"bytes"
 	"fmt"
-	"testing"
-
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 var parseCrontabTestCases = []struct {
