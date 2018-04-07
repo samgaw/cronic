@@ -2,7 +2,7 @@ package cron
 
 import (
 	"fmt"
-	"github.com/aptible/supercronic/crontab"
+	"github.com/samgaw/cronic/crontab"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"

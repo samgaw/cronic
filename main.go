@@ -3,8 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/aptible/supercronic/cron"
-	"github.com/aptible/supercronic/crontab"
+	"github.com/samgaw/cronic/cron"
+	"github.com/samgaw/cronic/crontab"
 	"github.com/sirupsen/logrus"
 	"os"
 	"os/signal"

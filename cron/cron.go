@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	"github.com/aptible/supercronic/crontab"
+	"github.com/samgaw/cronic/crontab"
 	"github.com/sirupsen/logrus"
 	"io"
 	"os"
@@ -66,7 +66,7 @@ func runJob(cronCtx *crontab.Context, command string, jobLogger *logrus.Entry) e
 	cmd := exec.Command(cronCtx.Shell, "-c", command)
 
 	// Run in a separate process group so that in interactive usage, CTRL+C
-	// stops supercronic, not the children threads.
+	// stops cronic, not the children threads.
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 
 	env := os.Environ()

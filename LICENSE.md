@@ -1,5 +1,6 @@
 MIT License
 
+Copyright (c) 2018, Sam Gaw
 Copyright (c) 2017, Aptible, Inc.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
