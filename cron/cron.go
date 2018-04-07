@@ -4,8 +4,6 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	"github.com/samgaw/cronic/crontab"
-	"github.com/sirupsen/logrus"
 	"io"
 	"os"
 	"os/exec"
@@ -13,7 +11,12 @@ import (
 	"sync"
 	"syscall"
 	"time"
+
+	"github.com/samgaw/cronic/crontab"
+
+	"github.com/sirupsen/logrus"
 )
+
 
 var (
 	READ_BUFFER_SIZE = 64 * 1024
@@ -121,23 +124,26 @@ func monitorJob(ctx context.Context, expression crontab.Expression, t0 time.Time
 	}
 }
 
-func StartJob(wg *sync.WaitGroup, cronCtx *crontab.Context, job *crontab.Job, exitChan chan interface{}, cronLogger *logrus.Entry) {
+// StartJob starts the cron job.
+func StartJob(wg *sync.WaitGroup, context *crontab.Context, job *crontab.Job, exitChan chan interface{}, cronLogger *logrus.Entry, overlapping bool) {
 	wg.Add(1)
 
 	go func() {
 		defer wg.Done()
 
-		var cronIteration uint64 = 0
+		var cronIteration uint64
 		nextRun := time.Now()
 
-		// NOTE: this (intentionally) does not run multiple instances of the
-		// job concurrently
+		// NOTE:	If overlapping is disabled, this does not run multiple
+		// 				instances of the job concurrently
 		for {
 			nextRun = job.Expression.Next(nextRun)
 			cronLogger.Debugf("job will run next at %v", nextRun)
 
 			delay := nextRun.Sub(time.Now())
-			if delay < 0 {
+			// A job should never take longer to start than the run frequency
+			// so delay should never be `< 0` but some people are idiots
+			if delay < 0 && !overlapping {
 				cronLogger.Warningf("job took too long to run: it should have started %v ago", -delay)
 				nextRun = time.Now()
 				continue
@@ -151,9 +157,19 @@ func StartJob(wg *sync.WaitGroup, cronCtx *crontab.Context, job *crontab.Job, ex
 				// Proceed normally
 			}
 
-			jobLogger := cronLogger.WithFields(logrus.Fields{
-				"iteration": cronIteration,
-			})
+			run := func(iteration uint64) {
+				jobLogger := cronLogger.WithFields(logrus.Fields{
+					"iteration": iteration,
+				})
+
+				err := runJob(context, job.Command, jobLogger)
+
+				if err == nil {
+					jobLogger.Info("job succeeded")
+				} else {
+					jobLogger.Error(err)
+				}
+			}
 
 			err := func() error {
 				ctx, cancel := context.WithCancel(context.Background())
@@ -164,11 +180,11 @@ func StartJob(wg *sync.WaitGroup, cronCtx *crontab.Context, job *crontab.Job, ex
 				return runJob(cronCtx, job.Command, jobLogger)
 			}()
 
-			if err == nil {
-				jobLogger.Info("job succeeded")
-			} else {
-				jobLogger.Error(err)
-			}
+			if overlapping {
+				go run(cronIteration)
+ 			} else {
+ 				run(cronIteration)
+ 			}
 
 			cronIteration++
 		}

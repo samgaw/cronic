@@ -3,14 +3,17 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/samgaw/cronic/cron"
-	"github.com/samgaw/cronic/crontab"
-	"github.com/sirupsen/logrus"
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
+
+	"github.com/samgaw/cronic/cron"
+	"github.com/samgaw/cronic/crontab"
+
+	"github.com/sirupsen/logrus"
 )
+
 
 var Usage = func() {
 	fmt.Fprintf(os.Stderr, "Usage: %s [OPTIONS] CRONTAB\n\nAvailable options:\n", os.Args[0])
@@ -20,6 +23,7 @@ var Usage = func() {
 func main() {
 	debug := flag.Bool("debug", false, "enable debug logging")
 	json := flag.Bool("json", false, "enable JSON logging")
+	overlapping := flag.Bool("overlapping", false, "enable tasks overlapping")
 	flag.Parse()
 
 	if *debug {
@@ -63,7 +67,7 @@ func main() {
 			"job.position": job.Position,
 		})
 
-		cron.StartJob(&wg, tab.Context, job, exitChan, cronLogger)
+		cron.StartJob(&wg, tab.Context, job, exitChan, cronLogger, *overlapping)
 	}
 
 	termChan := make(chan os.Signal, 1)

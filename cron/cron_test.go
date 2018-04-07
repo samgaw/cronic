@@ -2,15 +2,17 @@ package cron
 
 import (
 	"fmt"
-	"github.com/samgaw/cronic/crontab"
-	"github.com/sirupsen/logrus"
-	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"regexp"
 	"strings"
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/samgaw/cronic/crontab"
+	
+	"github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
 )
 
 var (
